@@ -57,7 +57,7 @@
       content="Mark Otto, Jacob Thornton, and Bootstrap contributors"
     />
     <meta name="generator" content="Jekyll v3.8.5" />
-    <title>Album example · Bootstrap</title>
+    <title>Album|Bootstrap|Fetch|API</title>
 
     <link
       rel="canonical"
@@ -195,8 +195,15 @@
             them in a cool way!
           </p>
           <p>
-            <a href="#" class="btn btn-primary my-2">Load Images</a>
-            <a href="#" class="btn btn-secondary my-2">Load Secondary Images</a>
+            <a href="#" id="load-images" class="btn btn-primary my-2"
+              >Load Images</a
+            >
+            <a
+              href="#"
+              id="load-secondary-images"
+              class="btn btn-secondary my-2"
+              >Load Secondary Images</a
+            >
           </p>
         </div>
       </section>
@@ -242,7 +249,7 @@
                         type="button"
                         class="btn btn-sm btn-outline-secondary"
                       >
-                        Edit
+                        Hide
                       </button>
                     </div>
                     <small class="text-muted">9 mins</small>
@@ -624,7 +631,43 @@
         </div>
       </div>
     </main>
-
+    <!-- MODAL ELEMENT HERE -->
+    <!-- Modal -->
+    <div
+      class="modal fade"
+      id="exampleModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Requested Image:</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">...</div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="button" class="btn btn-primary">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <footer class="text-muted">
       <div class="container">
         <p class="float-right">
@@ -637,19 +680,97 @@
       </div>
     </footer>
     <script>
+      //5: Let's create modal for our "view" button under every image's card.
+      // modal is copied from bootstraps components and inserted after </main>
+      //5.1: added "onclick="showModal(event)" to the button "view"
+      const showModal = (event) => {
+        const url = event.target.closest(".card").children[0].src;
+        //now let's grab our modal
+        const modalBody = document.querySelector(".modal-body");
+        const img = `<img src="${url}" style="width: 100%; object-fit: cover"/>`;
+        const texty = `<h6>Don't forget to mention the artist!</h6>`;
+        modalBody.innerHTML = texty + img;
+      };
+      //4th move: (Rendering the data from 3rd move)
+      const renderData = (data) => {
+        //4.1: we need to grab our row element
+        const parent = document.querySelector(".album .row");
+        //4.3: before adding new cards lets remove old ones:
+        parent.innerHTML = "";
+        //console.log(Parent); ->  div class row
+        //4.2: now let's generate an actual column. Since data is an array, we can..
+        data.photos.forEach((photo) => {
+          //"template-literal (whole `` part below is copied from the code above"
+          const card = `<div class="col-md-4">
+              <div class="card mb-4 shadow-sm">
+                <img src="${photo.src.large}"/>
+                <div class="card-body">
+                  <div
+                    class="d-flex justify-content-between align-items-center"
+                  >
+                    <div class="btn-group">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-secondary" onclick="showModal(event)"
+                        data-toggle="modal" data-target="#exampleModal"
+                      >
+                        View <i class="fa-solid fa-maximize"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-secondary"
+                      >
+                        Hide  <i class="fa-regular fa-eye-slash"></i>
+                      </button>
+                      
+                    </div>
+                    <small class="text-muted">${photo.id}</small>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+          //4.4: after creating each card lets append it to our inner html since its completely empty (4.3)
+          parent.innerHTML += card;
+        });
+      };
+      //1st move
       const options = {
         headers: {
           Authorization:
-            "Bearer 563492ad6f91700001000001112b8c1be86543fda90a41c380850951",
+            "563492ad6f91700001000001112b8c1be86543fda90a41c380850951",
         },
       };
-      const loadImages = () => {
-        fetch("https://api.pexels.com/v1/search?query=coffee", options)
-          .then((response) => response.json())
-          .then((result) => console.log(result, result.photos[0]))
+      const searchImages = (query) => {
+        fetch(`https://api.pexels.com/v1/search?query=${query}`, options)
+          .then((randomnameResponse) => randomnameResponse.json())
+          .then((data) => {
+            console.log(data); //(commented out cuz now we can use function from 4th move)
+            renderData(data);
+          })
           .catch((err) => console.log(err));
       };
+      //searchImages("Car"); (Commented out cuz we have added exactly the same line below)
+      //Successful search, returning an object of arrays.
+      //2st move:
+      // we have added different id's for each button and now we are ready to add functionality for them.
+      //3rd move:
+      window.onload = () => {
+        const primaryBtn = document.getElementById("load-images"); //1st button grabbed
+        const secondaryBtn = document.getElementById("load-secondary-images"); //2nd button grabbed
+        //now lets attach even listener:
+        primaryBtn.addEventListener("click", () => {
+          searchImages("gaming");
+        });
+        secondaryBtn.addEventListener("click", () => {
+          searchImages("cat");
+        });
+        //now when we click the first 2 buttons it executes and we can see result of new arrays in console log.
+      };
     </script>
+    <script
+      src="https://kit.fontawesome.com/8539ff3369.js"
+      crossorigin="anonymous"
+    ></script>
     <script
       src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
       integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
